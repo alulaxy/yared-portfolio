@@ -1,17 +1,17 @@
 {
-  "name": "Yared Gebretsadkan",
-  "role": "Filmmaker / Cinematographer",
-  "portrait": "/images/profile-portrait.jpg",
+  "instagram_url": "",
+  "education": "Blue Nile Film and Television Academy",
   "bio_paragraph_1": "Yared is an Addis Ababa-based cinematographer and a graduate of the Blue Nile Film and Television Academy. His work spans commercials, short films and fictional documentaries, generally defined by a naturalistic approach — motivated lighting and authentic composition in service of visuals that stay true to the story rather than calling attention to themselves.",
   "bio_paragraph_2": "He has extensive experience collaborating with international crews across a range of professional sets, moving between narrative and commercial work while keeping the same restraint and attention to light in both.",
+  "name": "Yared Gebretsadkan",
+  "linkedin_url": "",
   "based_in": "Addis Ababa, Ethiopia",
-  "education": "Blue Nile Film and Television Academy",
-  "focus": "Commercials, short films & documentaries",
-  "available_for": "Commercial & narrative work",
   "additional_credit": "Fig Tree (2018, dir. Aäläm-Wärqe Davidian) — Assistant Lighting, Black Sheep Film Productions",
-  "contact_email": "hello@yaredgeberetsadaken.com",
-  "instagram_handle": "@yared.films",
-  "instagram_url": "",
   "linkedin_label": "Yared Gebretsadkan",
-  "linkedin_url": ""
+  "available_for": "Commercial & narrative work",
+  "instagram_handle": "@yared.films",
+  "role": "Filmmaker / Cinematographer",
+  "focus": "Commercials, short films & documentaries",
+  "portrait": "/images/uploads/1000031769.png",
+  "contact_email": "hello@yaredgeberetsadaken.com"
 }
