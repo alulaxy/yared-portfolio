@@ -1,0 +1,74 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# After deploying, set this to your live site URL in Netlify (Site settings
+# > General), or Decap CMS will try to guess it. Uncommenting and setting
+# it explicitly avoids login issues:
+# site_url: https://your-site-name.netlify.app
+
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "profile"
+    label: "Profile / About"
+    files:
+      - name: "profile"
+        label: "Profile"
+        file: "content/profile.json"
+        fields:
+          - { label: "Name", name: "name", widget: "string" }
+          - { label: "Role / Title", name: "role", widget: "string" }
+          - { label: "Portrait photo", name: "portrait", widget: "image" }
+          - { label: "Bio — paragraph 1", name: "bio_paragraph_1", widget: "text" }
+          - { label: "Bio — paragraph 2", name: "bio_paragraph_2", widget: "text" }
+          - { label: "Based in", name: "based_in", widget: "string" }
+          - { label: "Education", name: "education", widget: "string" }
+          - { label: "Focus", name: "focus", widget: "string" }
+          - { label: "Available for", name: "available_for", widget: "string" }
+          - { label: "Additional credit", name: "additional_credit", widget: "string", required: false }
+          - { label: "Contact email", name: "contact_email", widget: "string" }
+          - { label: "Instagram handle (display text)", name: "instagram_handle", widget: "string", required: false }
+          - { label: "Instagram URL", name: "instagram_url", widget: "string", required: false }
+          - { label: "LinkedIn label (display text)", name: "linkedin_label", widget: "string", required: false }
+          - { label: "LinkedIn URL", name: "linkedin_url", widget: "string", required: false }
+
+  - name: "projects"
+    label: "Projects"
+    files:
+      - name: "projects"
+        label: "All Projects"
+        file: "content/projects.json"
+        fields:
+          - label: "Projects"
+            name: "items"
+            widget: "list"
+            summary: "{{title}} — {{category}}"
+            fields:
+              - { label: "Slug (used in the URL, lowercase, no spaces — use dashes)", name: "slug", widget: "string" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Director", name: "director", widget: "string" }
+              - { label: "Year", name: "year", widget: "string" }
+              - label: "Category"
+                name: "category"
+                widget: "select"
+                options: ["Short Film", "Documentary", "Music Film", "Commercial"]
+              - { label: "Description", name: "description", widget: "text" }
+              - { label: "Left still", name: "left", widget: "image" }
+              - { label: "Middle still", name: "mid", widget: "image" }
+              - { label: "Right still", name: "right", widget: "image" }
+              - { label: "Main video file (optional — upload a file directly)", name: "video", widget: "file", required: false }
+              - { label: "Or: external video link (YouTube, Vimeo, Facebook, etc.)", name: "external_video_url", widget: "string", required: false, hint: "If both a file and a link are set, the uploaded file takes priority. YouTube/Vimeo links play inline; other links (e.g. Facebook) show a 'Watch full film' button instead, since those platforms don't allow direct embedding." }
+              - label: "Gallery (project page)"
+                name: "gallery"
+                widget: "list"
+                field: { label: "Image", name: "image", widget: "image" }
+                required: false
+              - label: "Credits"
+                name: "credits"
+                widget: "list"
+                summary: "{{role}}: {{name}}"
+                fields:
+                  - { label: "Role", name: "role", widget: "string" }
+                  - { label: "Name", name: "name", widget: "string" }
