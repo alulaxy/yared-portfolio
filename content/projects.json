@@ -38,6 +38,17 @@
       "description": "A new year commercial for Kana Television",
       "year": "2024",
       "category": "Commercial"
+    },
+    {
+      "left": "/images/uploads/img_2517.png",
+      "mid": "/images/uploads/img_2516.png",
+      "slug": "Coop Bank",
+      "director": "Joseph Baye",
+      "title": "Coop Bank World Cup Commercial",
+      "right": "/images/uploads/img_2519.png",
+      "description": "A commercial Filmed for Berry Advertising ",
+      "year": "2026",
+      "category": "Commercial"
     }
   ]
 }
