@@ -97,6 +97,18 @@
       "description": "a short documentary filmed for Berry advertising ",
       "year": "2024",
       "category": "Documentary"
+    },
+    {
+      "left": "/images/uploads/img_4986.jpg",
+      "mid": "/images/uploads/img_4985.jpg",
+      "slug": "The fortunate short movie",
+      "director": "Habtamu Gebrehiwot",
+      "title": "Fortunate // 2025",
+      "video": "https://youtu.be/0QQWOb6WEoQ?si=z4Mc3A2UXY59nRM5",
+      "right": "/images/uploads/img_4987.jpg",
+      "description": "Pastor in a small Ethiopian town, who secretly battles alcoholism, wins a car from a beer bottle-forcing a dangerous confrontation that threatens to expose him and destroy his community.",
+      "year": "2025",
+      "category": "Short Film"
     }
   ]
 }
