@@ -85,6 +85,18 @@
       "description": "A bank commercial ( HIBRET BANK ) filmed for Berry Advertising ",
       "year": "2023",
       "category": "Commercial"
+    },
+    {
+      "left": "/images/uploads/img_4978.png",
+      "mid": "/images/uploads/img_4982.png",
+      "slug": "BGI Ethiopia",
+      "director": "Besufikad Asefa",
+      "title": "BGI Ethiopia // we stand by Dignity ,  Integrity and Honesty ",
+      "video": "https://youtu.be/Q-V7Tn5sVuM?si=gQ9bKxWxv-mL4f0x",
+      "right": "/images/uploads/img_4980.png",
+      "description": "a short documentary filmed for Berry advertising ",
+      "year": "2024",
+      "category": "Documentary"
     }
   ]
 }
