@@ -6,20 +6,8 @@
     <title>Content Manager — Yared Gebretsadkan</title>
   </head>
   <body>
-    <!-- Netlify Identity widget: lets Yared log in with the account you invite him with -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", (user) => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-    </script>
-    <!-- Decap CMS (the actual admin/editing interface) -->
+    <!-- Decap CMS (the actual admin/editing interface). Logs in via GitHub
+         OAuth, using the Cloudflare Worker configured in config.yml. -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   </body>
 </html>
