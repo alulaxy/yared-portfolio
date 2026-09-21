@@ -1,11 +1,14 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: alulaxy/yared-portfolio
   branch: main
+  # Set this to your deployed Cloudflare Worker's URL (see
+  # cloudflare-worker/oauth-worker.js for setup instructions), e.g.
+  # https://yaredg-cms-auth.<your-subdomain>.workers.dev
+  base_url: https://REPLACE-WITH-YOUR-WORKER-URL.workers.dev
+  auth_endpoint: auth
 
-# After deploying, set this to your live site URL in Netlify (Site settings
-# > General), or Decap CMS will try to guess it. Uncommenting and setting
-# it explicitly avoids login issues:
-# site_url: https://your-site-name.netlify.app
+site_url: https://yaredg.com
 
 media_folder: "images/uploads"
 public_folder: "/images/uploads"
