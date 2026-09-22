@@ -8,18 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {
-      if (!user) {
-        window.netlifyIdentity.on("login", () => {
-          document.location.href = "/admin/";
-        });
-      }
-    });
-  }
-</script>
 <style>
   :root{
     --black:#000000; --white:#ffffff; --gray:#a0a0a0; --dark-gray:#222222; --accent:#ff6b35;
@@ -107,6 +95,8 @@
   .pp__main-video .video-frame{ position:relative; width:100%; aspect-ratio:16/9; background:var(--dark-gray); overflow:hidden; }
   .video-frame video, .video-frame img{ width:100%; height:100%; object-fit:cover; }
   .video-frame__play{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:56px; height:56px; border-radius:50%; border:1px solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); background:rgba(0,0,0,.2); transition:transform .3s ease, border-color .3s ease; }
+  .watch-external-frame{ display:block; position:relative; width:100%; height:100%; }
+  .watch-external-frame:hover .video-frame__play{ transform:translate(-50%,-50%) scale(1.08); border-color:var(--accent); }
   .video-frame__play:hover{ transform:translate(-50%,-50%) scale(1.06); border-color:var(--accent); }
   .video-frame__play svg{ width:14px; height:14px; margin-left:2px; }
   .watch-external{
@@ -253,6 +243,16 @@
     window.scrollTo(0,0);
   }
 
+  function getEmbedUrl(url){
+    if(!url) return null;
+    const trimmed = url.trim();
+    let m = trimmed.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{6,})/);
+    if(m) return `https://www.youtube.com/embed/${m[1]}`;
+    m = trimmed.match(/vimeo\.com\/(\d+)/);
+    if(m) return `https://player.vimeo.com/video/${m[1]}`;
+    return null;
+  }
+
   function filterProjects(){
     if(currentFilter === 'commercial') return PROJECTS.filter(p => (p.category||'').toLowerCase() === 'commercial');
     if(currentFilter === 'narrative') return PROJECTS.filter(p => (p.category||'').toLowerCase() !== 'commercial');
@@ -295,15 +295,6 @@
     document.querySelectorAll('.nav__dropdown a').forEach(a => a.classList.toggle('is-active', a.dataset.cat === currentFilter));
   }
 
-  function getEmbedUrl(url){
-    if(!url) return null;
-    let m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{6,})/);
-    if(m) return `https://www.youtube.com/embed/${m[1]}`;
-    m = url.match(/vimeo\.com\/(\d+)/);
-    if(m) return `https://player.vimeo.com/video/${m[1]}`;
-    return null;
-  }
-
   function renderProject(slug){
     const idx = PROJECTS.findIndex(p => p.slug === slug);
     const p = PROJECTS[idx] || PROJECTS[0];
@@ -317,9 +308,9 @@
       <div class="pp__credits-row"><span class="role">${c.role}</span><span class="name">${c.name}</span></div>
     `).join('');
 
-    const embedUrl = getEmbedUrl(p.external_video_url);
     let videoHtml, watchLinkHtml = '';
     let frameKind = 'none';
+    const embedUrl = getEmbedUrl(p.external_video_url);
 
     if(p.video){
       // A file was uploaded directly through the admin — takes priority.
@@ -330,16 +321,26 @@
          </video>`;
       frameKind = 'video';
     } else if(embedUrl){
-      // A YouTube/Vimeo link — starts on its poster, plays inline on hover.
+      // A YouTube/Vimeo link — hovering the frame loads a quiet muted
+      // preview inline. A separate button underneath always links out
+      // to the real page on YouTube/Vimeo for a full, sound-on watch.
       videoHtml = `<img src="${p.mid}" alt="${p.title} — still">
         <div class="video-frame__play" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </div>`;
       frameKind = 'embed';
+      watchLinkHtml = `<a class="watch-external" href="${p.external_video_url.trim()}" target="_blank" rel="noopener">WATCH ON YOUTUBE ↗</a>`;
     } else if(p.external_video_url){
-      // A link to a platform that can't be embedded directly (e.g. Facebook) — link out instead.
-      videoHtml = `<img src="${p.mid}" alt="${p.title} — still">`;
-      watchLinkHtml = `<a class="watch-external" href="${p.external_video_url}" target="_blank" rel="noopener">WATCH FULL FILM ↗</a>`;
+      // A link to a platform that can't be embedded directly (e.g. Facebook) —
+      // show the still with a play icon, and clicking opens the real
+      // video on its own platform in a new tab.
+      videoHtml = `<a class="watch-external-frame" href="${p.external_video_url.trim()}" target="_blank" rel="noopener" aria-label="Watch ${p.title} on its original platform">
+        <img src="${p.mid}" alt="${p.title} — still">
+        <div class="video-frame__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </a>`;
+      watchLinkHtml = `<a class="watch-external" href="${p.external_video_url.trim()}" target="_blank" rel="noopener">WATCH FULL FILM ↗</a>`;
     } else {
       // No video yet — just the still, no fake play button implying a video exists.
       videoHtml = `<img src="${p.mid}" alt="${p.title} — still">`;
@@ -394,14 +395,24 @@
           if(!frame.matches(':hover')) videoEl.muted = false;
         });
       } else if(kind === 'embed'){
+        // A YouTube/Vimeo link: hovering (or tapping, on touch devices)
+        // loads a quiet muted preview inline. The separate "WATCH ON
+        // YOUTUBE" button underneath always links straight to the real
+        // page for a full, sound-on watch.
         let loaded = false;
-        frame.addEventListener('mouseenter', ()=>{
+        const loadEmbed = ()=>{
           if(loaded) return;
           loaded = true;
-          const src = frame.dataset.embedUrl + (frame.dataset.embedUrl.includes('?') ? '&' : '?') + 'autoplay=1&mute=1';
-          frame.innerHTML = `<iframe src="${src}" title="video" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" style="width:100%;height:100%;border:0;"></iframe>`;
-        });
+          const base = frame.dataset.embedUrl;
+          const src = base + (base.includes('?') ? '&' : '?') + 'autoplay=1&mute=1';
+          frame.innerHTML = `<iframe src="${src}" title="video preview" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" style="width:100%;height:100%;border:0;"></iframe>`;
+        };
+        frame.addEventListener('mouseenter', loadEmbed);
+        frame.addEventListener('touchstart', loadEmbed, { passive:true });
       }
+      // Non-embeddable external-link projects (e.g. Facebook) need no JS
+      // here — the still image is wrapped in a plain <a> that opens the
+      // real video on its own platform.
     }
   }
 
