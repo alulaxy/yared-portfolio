@@ -5,7 +5,7 @@ backend:
   # Set this to your deployed Cloudflare Worker's URL (see
   # cloudflare-worker/oauth-worker.js for setup instructions), e.g.
   # https://yaredg-cms-auth.<your-subdomain>.workers.dev
-  base_url: https://REPLACE-WITH-YOUR-WORKER-URL.workers.dev
+  base_url: https://yaredg-cms-auth.benxynerea.workers.dev
   auth_endpoint: auth
 
 site_url: https://yaredg.com
