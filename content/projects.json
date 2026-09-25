@@ -119,6 +119,18 @@
       "description": "Highkey commercial filmed for Berry Advertising ",
       "year": "2023",
       "category": "Commercial"
+    },
+    {
+      "left": "/images/uploads/img_4986.jpg",
+      "mid": "/images/uploads/img_4985.jpg",
+      "slug": "SMENEH",
+      "director": "Beza Hailu Lema",
+      "title": "Addis Fikir // SMENEH",
+      "video": "https://youtu.be/fzPC6msxQZA?si=aFWNuer9qG4RszRI",
+      "right": "/images/uploads/img_4987.jpg",
+      "description": " SMENEH is an anthology sererie ( one episode ) from the show called Addis Fikir filmed for DSTV",
+      "year": "2024",
+      "category": "Short Film"
     }
   ]
 }
