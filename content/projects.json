@@ -76,12 +76,24 @@
       "mid": "/images/uploads/screenshot-2026-09-21-at-4.18.22-in-the-afternoon.jpg",
       "slug": "Hibret Bank",
       "director": "Izrael Mehari",
-      "title": "Hibret Bank ",
       "external_video_url": "https://youtu.be/_A1GfTw0OjM?si=86zqkKzvcGpwrvD-",
+      "title": "Hibret Bank ",
       "right": "/images/uploads/img_4960.jpg",
       "description": "A bank commercial ( HIBRET BANK ) filmed for Berry Advertising ",
       "year": "2023",
       "category": "Commercial"
+    },
+    {
+      "left": "/images/uploads/img_4978.png",
+      "mid": "/images/uploads/img_4982.png",
+      "slug": "BGI Ethiopia",
+      "director": "Beaufikad asefa",
+      "title": "BGI Ethiopia// Integrity , Loyalty and Honesty",
+      "video": "https://youtu.be/Q-V7Tn5sVuM?si=xImd0hO0cyQShsMC",
+      "right": "/images/uploads/img_4980.png",
+      "description": "A documentary filmed for Berry advertising ",
+      "year": "2025",
+      "category": "Documentary"
     }
   ]
 }
