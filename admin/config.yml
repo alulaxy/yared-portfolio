@@ -75,3 +75,21 @@ collections:
                 fields:
                   - { label: "Role", name: "role", widget: "string" }
                   - { label: "Name", name: "name", widget: "string" }
+
+  - name: "bts"
+    label: "Behind the Scenes"
+    files:
+      - name: "bts"
+        label: "All Behind the Scenes clips"
+        file: "content/bts.json"
+        fields:
+          - label: "Clips"
+            name: "items"
+            widget: "list"
+            summary: "{{title}}"
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Caption / short note", name: "caption", widget: "text", required: false }
+              - { label: "Cover image", name: "cover", widget: "image", required: false, hint: "Shown before the clip plays. If left empty, the clip's own first frame is used (for uploaded files only)." }
+              - { label: "Clip file (optional — upload a file directly)", name: "clip", widget: "file", required: false }
+              - { label: "Or: external video link (YouTube, Vimeo, Facebook, etc.)", name: "external_video_url", widget: "string", required: false, hint: "If both a file and a link are set, the uploaded file takes priority." }
