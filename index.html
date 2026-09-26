@@ -253,6 +253,19 @@
     return null;
   }
 
+  // The CMS's "Main video file" field is meant for a directly-uploaded
+  // video (which ends up as a same-origin path like /images/uploads/x.mp4).
+  // If a YouTube/Vimeo/Facebook/TikTok link gets pasted into that field by
+  // mistake instead of "external video link", it is NOT a playable file —
+  // treat it the same way we'd treat a link, instead of feeding it to a
+  // raw <video><source> (which just shows a broken/blank player).
+  function isRealVideoFile(url){
+    if(!url) return false;
+    const u = url.trim();
+    if(/^https?:\/\//i.test(u) && /(youtu\.?be|vimeo\.com|facebook\.com|fb\.watch|tiktok\.com)/i.test(u)) return false;
+    return true;
+  }
+
   function filterProjects(){
     if(currentFilter === 'commercial') return PROJECTS.filter(p => (p.category||'').toLowerCase() === 'commercial');
     if(currentFilter === 'narrative') return PROJECTS.filter(p => (p.category||'').toLowerCase() !== 'commercial');
@@ -266,18 +279,19 @@
       listEl.innerHTML = '<div class="work-list__empty">No projects in this category yet.</div>';
     } else {
       listEl.innerHTML = list.map(p => {
-        const mainMedia = p.video
-          ? `<video class="work-row__video" muted loop playsinline poster="${p.mid}" preload="none"><source src="${p.video}"></video>
+        const realVideo = isRealVideoFile(p.video) ? p.video : null;
+        const mainMedia = realVideo
+          ? `<video class="work-row__video" muted loop playsinline poster="${p.mid}" preload="none"><source src="${realVideo}"></video>
              <div class="work-row__video-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`
           : `<img src="${p.mid}" alt="" loading="lazy">`;
         return `
         <div class="work-row">
           <div class="work-row__grid">
             <div class="work-row__img work-row__img--side"><img src="${p.left}" alt="" loading="lazy"></div>
-            <a class="work-row__img work-row__img--main" href="#/work/${p.slug}" aria-label="Open ${p.title}">${mainMedia}</a>
+            <a class="work-row__img work-row__img--main" href="#/work/${encodeURIComponent(p.slug)}" aria-label="Open ${p.title}">${mainMedia}</a>
             <div class="work-row__img work-row__img--side"><img src="${p.right}" alt="" loading="lazy"></div>
           </div>
-          <a class="work-row__caption" href="#/work/${p.slug}" aria-label="Open ${p.title}">
+          <a class="work-row__caption" href="#/work/${encodeURIComponent(p.slug)}" aria-label="Open ${p.title}">
             <div class="work-row__title">${(p.title||'').toUpperCase()} (${(p.category||'').toUpperCase()})</div>
             <div class="work-row__dir">DIR. ${(p.director||'').toUpperCase()}</div>
           </a>
@@ -310,14 +324,22 @@
 
     let videoHtml, watchLinkHtml = '';
     let frameKind = 'none';
-    const embedUrl = getEmbedUrl(p.external_video_url);
+    // The real uploaded file (if the "video" field actually holds one —
+    // see isRealVideoFile). If a YouTube/Vimeo/etc. link was pasted into
+    // that field instead, fall back to treating it as a link, same as
+    // external_video_url.
+    const realVideo = isRealVideoFile(p.video) ? p.video : null;
+    const linkUrl = ((p.external_video_url && p.external_video_url.trim())
+      || (!realVideo && p.video && p.video.trim())
+      || '');
+    const embedUrl = getEmbedUrl(linkUrl);
 
-    if(p.video){
+    if(realVideo){
       // A file was uploaded directly through the admin — takes priority.
       // Starts paused on the poster; hover gives a quiet preview, and an
       // actual click (native play button) plays it with sound.
       videoHtml = `<video loop playsinline controls preload="metadata" poster="${p.mid}" aria-label="${p.title} — main film">
-           <source src="${p.video}">
+           <source src="${realVideo}">
          </video>`;
       frameKind = 'video';
     } else if(embedUrl){
@@ -329,18 +351,18 @@
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </div>`;
       frameKind = 'embed';
-      watchLinkHtml = `<a class="watch-external" href="${p.external_video_url.trim()}" target="_blank" rel="noopener">WATCH ON YOUTUBE ↗</a>`;
-    } else if(p.external_video_url){
+      watchLinkHtml = `<a class="watch-external" href="${linkUrl}" target="_blank" rel="noopener">WATCH ON YOUTUBE ↗</a>`;
+    } else if(linkUrl){
       // A link to a platform that can't be embedded directly (e.g. Facebook) —
       // show the still with a play icon, and clicking opens the real
       // video on its own platform in a new tab.
-      videoHtml = `<a class="watch-external-frame" href="${p.external_video_url.trim()}" target="_blank" rel="noopener" aria-label="Watch ${p.title} on its original platform">
+      videoHtml = `<a class="watch-external-frame" href="${linkUrl}" target="_blank" rel="noopener" aria-label="Watch ${p.title} on its original platform">
         <img src="${p.mid}" alt="${p.title} — still">
         <div class="video-frame__play" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </div>
       </a>`;
-      watchLinkHtml = `<a class="watch-external" href="${p.external_video_url.trim()}" target="_blank" rel="noopener">WATCH FULL FILM ↗</a>`;
+      watchLinkHtml = `<a class="watch-external" href="${linkUrl}" target="_blank" rel="noopener">WATCH FULL FILM ↗</a>`;
     } else {
       // No video yet — just the still, no fake play button implying a video exists.
       videoHtml = `<img src="${p.mid}" alt="${p.title} — still">`;
@@ -368,7 +390,7 @@
       <div class="pp__credits"><h3>CREDITS</h3><div class="pp__credits-list">${creditsHtml}</div></div>
       <div class="pp__footer-nav">
         <a href="#/">← BACK TO WORK</a>
-        <a class="next" href="#/work/${nextP.slug}">NEXT PROJECT: ${(nextP.title||'').toUpperCase()} →</a>
+        <a class="next" href="#/work/${encodeURIComponent(nextP.slug)}">NEXT PROJECT: ${(nextP.title||'').toUpperCase()} →</a>
       </div>
     `;
 
@@ -466,7 +488,7 @@
     } else if(hash === '/contact'){
       showView('contact'); setActiveNav('/contact'); renderContact();
     } else if(hash.indexOf('/work/') === 0){
-      renderProject(hash.replace('/work/',''));
+      renderProject(decodeURIComponent(hash.replace('/work/','')));
       showView('project'); setActiveNav('');
     } else {
       showView('home'); setActiveNav('/'); buildWorkList();
