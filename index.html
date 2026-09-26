@@ -137,6 +137,21 @@
   .about__fact .label{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray); margin-bottom:6px; }
   .about__fact .val{ font-size:14px; font-weight:400; }
 
+  /* ---- Behind the scenes ---- */
+  .bts{ padding:150px 32px 100px; max-width:1400px; margin:0 auto; min-height:100vh; }
+  .bts__heading{ font-size:clamp(26px, 4vw, 40px); font-weight:500; letter-spacing:-.02em; margin-bottom:40px; }
+  .bts__grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:28px; }
+  .bts__card{ display:block; }
+  .bts__media{ position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; background:var(--dark-gray); }
+  .bts__media video, .bts__media img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .bts__media .video-frame__play{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:48px; height:48px; border-radius:50%; border:1px solid rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); background:rgba(0,0,0,.25); transition:transform .3s ease, border-color .3s ease; }
+  .bts__media .video-frame__play svg{ width:13px; height:13px; margin-left:2px; }
+  a.bts__media:hover .video-frame__play{ transform:translate(-50%,-50%) scale(1.08); border-color:var(--accent); }
+  .bts__caption{ margin-top:14px; }
+  .bts__card-title{ font-size:12.5px; letter-spacing:.08em; font-weight:500; }
+  .bts__card-note{ font-size:12.5px; line-height:1.6; color:var(--gray); margin-top:4px; }
+  .bts__empty{ text-align:center; color:var(--gray); font-size:13px; padding:80px 0; }
+
   /* ---- Contact ---- */
   .contact{ min-height:100vh; display:flex; align-items:center; padding:150px 32px 100px; }
   .contact__inner{ max-width:560px; margin:0 auto; }
@@ -192,6 +207,7 @@
         <a href="#" data-cat="narrative">NARRATIVE</a>
       </div>
     </li>
+    <li><a href="#/bts" data-route="/bts">BTS</a></li>
     <li><a href="#/about" data-route="/about">ABOUT</a></li>
     <li><a href="#/contact" data-route="/contact">CONTACT</a></li>
   </ul>
@@ -204,6 +220,13 @@
 
   <section class="view" id="view-project">
     <article class="pp" id="projectPage"></article>
+  </section>
+
+  <section class="view" id="view-bts">
+    <div class="bts">
+      <h1 class="bts__heading">Behind the Scenes</h1>
+      <div class="bts__grid" id="btsGrid"></div>
+    </div>
   </section>
 
   <section class="view" id="view-about">
@@ -224,11 +247,13 @@
 (function(){
   let PROFILE = null;
   let PROJECTS = [];
+  let BTS = [];
   let currentFilter = 'all';
 
   const views = {
     home: document.getElementById('view-home'),
     project: document.getElementById('view-project'),
+    bts: document.getElementById('view-bts'),
     about: document.getElementById('view-about'),
     contact: document.getElementById('view-contact'),
   };
@@ -438,6 +463,47 @@
     }
   }
 
+  function renderBts(){
+    const el = document.getElementById('btsGrid');
+    if(!BTS.length){
+      el.innerHTML = '<div class="bts__empty">No behind-the-scenes clips yet.</div>';
+      return;
+    }
+    el.innerHTML = BTS.map(c => {
+      // Same file-vs-link handling as Projects: a real uploaded file plays
+      // directly; a YouTube/Vimeo/etc. link (whichever field it landed in)
+      // just opens on its own platform in a new tab.
+      const realClip = isRealVideoFile(c.clip) ? c.clip : null;
+      const linkUrl = ((c.external_video_url && c.external_video_url.trim())
+        || (!realClip && c.clip && c.clip.trim())
+        || '');
+      const playIcon = `<div class="video-frame__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`;
+
+      let mediaHtml;
+      if(realClip){
+        mediaHtml = `<div class="bts__media"><video controls loop playsinline preload="metadata" ${c.cover ? `poster="${c.cover}"` : ''} aria-label="${c.title||''}"><source src="${realClip}"></video></div>`;
+      } else if(linkUrl){
+        mediaHtml = `<a class="bts__media" href="${linkUrl}" target="_blank" rel="noopener" aria-label="Watch ${c.title||'clip'}">
+          ${c.cover ? `<img src="${c.cover}" alt="${c.title||''}">` : ''}
+          ${playIcon}
+        </a>`;
+      } else if(c.cover){
+        mediaHtml = `<div class="bts__media"><img src="${c.cover}" alt="${c.title||''}"></div>`;
+      } else {
+        mediaHtml = `<div class="bts__media"></div>`;
+      }
+
+      return `
+        <div class="bts__card">
+          ${mediaHtml}
+          <div class="bts__caption">
+            <div class="bts__card-title">${(c.title||'').toUpperCase()}</div>
+            ${c.caption ? `<div class="bts__card-note">${c.caption}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
   function renderAbout(){
     const p = PROFILE;
     if(!p) return;
@@ -483,6 +549,8 @@
     const hash = location.hash.replace(/^#/,'') || '/';
     if(hash === '/'){
       showView('home'); setActiveNav('/'); buildWorkList();
+    } else if(hash === '/bts'){
+      showView('bts'); setActiveNav('/bts'); renderBts();
     } else if(hash === '/about'){
       showView('about'); setActiveNav('/about'); renderAbout();
     } else if(hash === '/contact'){
@@ -527,10 +595,12 @@
 
   Promise.all([
     fetch('content/profile.json').then(r => r.json()),
-    fetch('content/projects.json').then(r => r.json())
-  ]).then(([profile, projectsData])=>{
+    fetch('content/projects.json').then(r => r.json()),
+    fetch('content/bts.json').then(r => r.ok ? r.json() : { items: [] }).catch(()=>({ items: [] }))
+  ]).then(([profile, projectsData, btsData])=>{
     PROFILE = profile;
     PROJECTS = projectsData.items || [];
+    BTS = (btsData && btsData.items) || [];
     document.getElementById('navBrand').textContent = (profile.name || '').toUpperCase();
     document.getElementById('footerName').textContent = '© 2026 ' + (profile.name || '').toUpperCase();
     document.title = profile.name + ' | ' + profile.role;
