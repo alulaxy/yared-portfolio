@@ -101,7 +101,7 @@
       "mid": "/images/uploads/img_4985.jpg",
       "slug": "THE FORTUNATE (2024)",
       "director": "Habtamu Gebrehiwot",
-      "title": "THE FORTUNATE (2024)",
+      "title": "THE FORTUNATE ",
       "video": "https://youtu.be/0QQWOb6WEoQ?si=3ketKkHkmOWlOVLx",
       "right": "/images/uploads/screenshot-2026-09-25-at-1.40.36-in-the-afternoon.png",
       "description": "THE FORTUNATE (2024) , A short movie  produced by Nahusenay Dereje // \n\"The Fortunate\" premiered to critical acclaim and won awards at multiple film festivals.",
@@ -131,6 +131,18 @@
       "description": "A Short PSA filmed for the Oromia Women's and Children's Affair Bureau.",
       "year": "2025",
       "category": "Commercial"
+    },
+    {
+      "left": "/images/uploads/screenshot-2026-09-25-at-9.05.34-in-the-morning.png",
+      "mid": "/images/uploads/screenshot-2026-09-25-at-9.06.05-in-the-morning.png",
+      "slug": "SIMENEH",
+      "director": "Beza Hailu Lema",
+      "title": "SIMENEH // ADDIS FIKIR",
+      "video": "https://youtu.be/x2JoS9_O0vk?si=QKxZPtilghcYPLPv",
+      "right": "/images/uploads/screenshot-2026-09-25-at-9.06.39-in-the-morning.png",
+      "description": "Premiering on DStv, \"Simeneh\" is a standalone episode from the acclaimed Amharic anthology series, \"Addis Fikir\".",
+      "year": "2024",
+      "category": "Short Film"
     }
   ]
 }
