@@ -146,7 +146,7 @@
   .bts__media video, .bts__media img{ width:100%; height:100%; object-fit:cover; display:block; }
   .bts__media .video-frame__play{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:48px; height:48px; border-radius:50%; border:1px solid rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); background:rgba(0,0,0,.25); transition:transform .3s ease, border-color .3s ease; }
   .bts__media .video-frame__play svg{ width:13px; height:13px; margin-left:2px; }
-  a.bts__media:hover .video-frame__play{ transform:translate(-50%,-50%) scale(1.08); border-color:var(--accent); }
+  .bts__media:hover .video-frame__play{ transform:translate(-50%,-50%) scale(1.08); border-color:var(--accent); }
   .bts__caption{ margin-top:14px; }
   .bts__card-title{ font-size:12.5px; letter-spacing:.08em; font-weight:500; }
   .bts__card-note{ font-size:12.5px; line-height:1.6; color:var(--gray); margin-top:4px; }
@@ -472,36 +472,88 @@
     el.innerHTML = BTS.map(c => {
       // Same file-vs-link handling as Projects: a real uploaded file plays
       // directly; a YouTube/Vimeo/etc. link (whichever field it landed in)
-      // just opens on its own platform in a new tab.
+      // is treated as a link — embedded with a hover preview when it's a
+      // YouTube/Vimeo link, or just opened on its own platform otherwise.
       const realClip = isRealVideoFile(c.clip) ? c.clip : null;
       const linkUrl = ((c.external_video_url && c.external_video_url.trim())
         || (!realClip && c.clip && c.clip.trim())
         || '');
+      const embedUrl = getEmbedUrl(linkUrl);
       const playIcon = `<div class="video-frame__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`;
 
-      let mediaHtml;
+      let mediaHtml, watchLinkHtml = '', frameKind = 'none';
+
       if(realClip){
-        mediaHtml = `<div class="bts__media"><video controls loop playsinline preload="metadata" ${c.cover ? `poster="${c.cover}"` : ''} aria-label="${c.title||''}"><source src="${realClip}"></video></div>`;
+        // A real uploaded file — hovering gives a quiet muted preview
+        // (same as Work list / project pages); an actual click on the
+        // native controls plays it with sound.
+        mediaHtml = `<video loop playsinline controls preload="metadata" ${c.cover ? `poster="${c.cover}"` : ''} aria-label="${c.title||''} — behind the scenes clip"><source src="${realClip}"></video>`;
+        frameKind = 'video';
+      } else if(embedUrl){
+        // A YouTube/Vimeo link — hovering loads a quiet muted preview
+        // inline, same as a project's external video. A separate link
+        // underneath always opens the real page for a full, sound-on watch.
+        mediaHtml = `${c.cover ? `<img src="${c.cover}" alt="${c.title||''}">` : ''}${playIcon}`;
+        frameKind = 'embed';
+        watchLinkHtml = `<a class="watch-external" href="${linkUrl}" target="_blank" rel="noopener">WATCH ON YOUTUBE ↗</a>`;
       } else if(linkUrl){
-        mediaHtml = `<a class="bts__media" href="${linkUrl}" target="_blank" rel="noopener" aria-label="Watch ${c.title||'clip'}">
+        // A link to a platform that can't be embedded directly (e.g. Facebook) —
+        // no hover preview possible; clicking opens it in a new tab.
+        mediaHtml = `<a class="watch-external-frame" href="${linkUrl}" target="_blank" rel="noopener" aria-label="Watch ${c.title||'clip'}">
           ${c.cover ? `<img src="${c.cover}" alt="${c.title||''}">` : ''}
           ${playIcon}
         </a>`;
+        watchLinkHtml = `<a class="watch-external" href="${linkUrl}" target="_blank" rel="noopener">WATCH FULL CLIP ↗</a>`;
       } else if(c.cover){
-        mediaHtml = `<div class="bts__media"><img src="${c.cover}" alt="${c.title||''}"></div>`;
+        mediaHtml = `<img src="${c.cover}" alt="${c.title||''}">`;
       } else {
-        mediaHtml = `<div class="bts__media"></div>`;
+        mediaHtml = '';
       }
 
       return `
         <div class="bts__card">
-          ${mediaHtml}
+          <div class="bts__media" data-kind="${frameKind}" data-embed-url="${embedUrl || ''}">${mediaHtml}</div>
           <div class="bts__caption">
             <div class="bts__card-title">${(c.title||'').toUpperCase()}</div>
             ${c.caption ? `<div class="bts__card-note">${c.caption}</div>` : ''}
+            ${watchLinkHtml}
           </div>
         </div>`;
     }).join('');
+
+    // Hover-to-preview, matching Work list / project page behavior.
+    el.querySelectorAll('.bts__media').forEach(frame => {
+      const kind = frame.dataset.kind;
+      if(kind === 'video'){
+        const videoEl = frame.querySelector('video');
+        if(!videoEl) return;
+        videoEl.muted = false; // real sound is the default; hover only mutes briefly for a quiet preview
+        frame.addEventListener('mouseenter', ()=>{
+          videoEl.muted = true;
+          videoEl.play().catch(()=>{});
+        });
+        frame.addEventListener('mouseleave', ()=>{
+          videoEl.pause();
+          videoEl.currentTime = 0;
+          videoEl.muted = false;
+        });
+        videoEl.addEventListener('play', ()=>{
+          if(!frame.matches(':hover')) videoEl.muted = false;
+        });
+      } else if(kind === 'embed'){
+        let loaded = false;
+        const loadEmbed = ()=>{
+          if(loaded) return;
+          loaded = true;
+          const base = frame.dataset.embedUrl;
+          const src = base + (base.includes('?') ? '&' : '?') + 'autoplay=1&mute=1';
+          frame.innerHTML = `<iframe src="${src}" title="video preview" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" style="width:100%;height:100%;border:0;"></iframe>`;
+        };
+        frame.addEventListener('mouseenter', loadEmbed);
+        frame.addEventListener('touchstart', loadEmbed, { passive:true });
+      }
+      // 'link' (non-embeddable) and 'none' kinds need no JS here.
+    });
   }
 
   function renderAbout(){
